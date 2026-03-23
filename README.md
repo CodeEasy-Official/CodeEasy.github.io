@@ -1,1 +1,1 @@
-# CodeEasy.github.io
+# codeeasy-official.github.io
