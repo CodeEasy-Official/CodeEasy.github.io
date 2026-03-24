@@ -1,846 +1,1207 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+<!DOCTYPE html>
+<html lang="en" data-theme="cyberpunk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CodeEasy — Neon Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════
+   THEME VARIABLES
+═══════════════════════════════════════════════════ */
+:root {
+  --nav-w: 242px;
+  --top-h: 62px;
+  --tab-h: 50px;
+  --radius: 6px;
+  --font-head: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
 
-/* ═══════════════════════════════════════════════════════════════
-   THEME DEFINITIONS
-═══════════════════════════════════════════════════════════════ */
-const THEMES = {
-  cyberpunk: {
-    name: "Cyberpunk",
-    bg: "#050510", bg2: "#0a0a1a", surface: "#0d0d22", surface2: "#12122e",
-    neon1: "#ff2d78", neon2: "#00f5ff", neon3: "#b44fff",
-    border: "rgba(255,45,120,0.3)", border2: "rgba(0,245,255,0.25)",
-    text: "#e8e0ff", muted: "#7a6a9a",
-    glow1: "0 0 8px #ff2d78, 0 0 24px rgba(255,45,120,0.4)",
-    glow2: "0 0 8px #00f5ff, 0 0 24px rgba(0,245,255,0.35)",
-    glow3: "0 0 8px #b44fff, 0 0 20px rgba(180,79,255,0.3)",
-    grid: "rgba(255,45,120,0.055)", scanline: "rgba(255,45,120,0.028)",
-    dot: "radial-gradient(circle at 35% 35%, #ff2d78, #b44fff)",
-    metal: "linear-gradient(135deg,#150510,#0e0a1e,#05101a)",
-  },
-  aurora: {
-    name: "Aurora",
-    bg: "#020d0a", bg2: "#040f0c", surface: "#061410", surface2: "#0a1c18",
-    neon1: "#00ff88", neon2: "#aa00ff", neon3: "#00ccff",
-    border: "rgba(0,255,136,0.28)", border2: "rgba(170,0,255,0.22)",
-    text: "#d0ffe8", muted: "#4a7a62",
-    glow1: "0 0 8px #00ff88, 0 0 28px rgba(0,255,136,0.35)",
-    glow2: "0 0 8px #aa00ff, 0 0 24px rgba(170,0,255,0.3)",
-    glow3: "0 0 8px #00ccff, 0 0 20px rgba(0,204,255,0.3)",
-    grid: "rgba(0,255,136,0.045)", scanline: "rgba(0,255,136,0.022)",
-    dot: "radial-gradient(circle at 35% 35%, #00ff88, #aa00ff)",
-    metal: "linear-gradient(135deg,#021a0a,#0a0216,#021018)",
-  },
-  chrome: {
-    name: "Chrome",
-    bg: "#080600", bg2: "#0e0c01", surface: "#110e02", surface2: "#181300",
-    neon1: "#ffd700", neon2: "#c0c0c0", neon3: "#ff8c00",
-    border: "rgba(255,215,0,0.3)", border2: "rgba(192,192,192,0.22)",
-    text: "#fff8dc", muted: "#7a6a30",
-    glow1: "0 0 8px #ffd700, 0 0 28px rgba(255,215,0,0.4)",
-    glow2: "0 0 8px #c0c0c0, 0 0 22px rgba(192,192,192,0.3)",
-    glow3: "0 0 8px #ff8c00, 0 0 22px rgba(255,140,0,0.35)",
-    grid: "rgba(255,215,0,0.055)", scanline: "rgba(255,215,0,0.022)",
-    dot: "radial-gradient(circle at 35% 35%, #ffd700, #c0c0c0)",
-    metal: "linear-gradient(135deg,#1a1200,#1a1a1a,#120800)",
-  },
-  toxic: {
-    name: "Toxic",
-    bg: "#020800", bg2: "#030c01", surface: "#050f02", surface2: "#091600",
-    neon1: "#aaff00", neon2: "#ff6600", neon3: "#00ffaa",
-    border: "rgba(170,255,0,0.3)", border2: "rgba(255,102,0,0.25)",
-    text: "#eeffcc", muted: "#5a6a30",
-    glow1: "0 0 8px #aaff00, 0 0 26px rgba(170,255,0,0.4)",
-    glow2: "0 0 8px #ff6600, 0 0 22px rgba(255,102,0,0.35)",
-    glow3: "0 0 8px #00ffaa, 0 0 20px rgba(0,255,170,0.3)",
-    grid: "rgba(170,255,0,0.045)", scanline: "rgba(170,255,0,0.022)",
-    dot: "radial-gradient(circle at 35% 35%, #aaff00, #ff6600)",
-    metal: "linear-gradient(135deg,#0a1400,#1a0800,#001a08)",
-  },
-};
+/* CYBERPUNK — hot pink + electric cyan */
+[data-theme="cyberpunk"] {
+  --bg: #050510;
+  --bg2: #0a0a1a;
+  --surface: #0d0d22;
+  --surface2: #12122e;
+  --neon1: #ff2d78;
+  --neon2: #00f5ff;
+  --neon3: #b44fff;
+  --metal: linear-gradient(135deg,#2a0a1a,#1a0a2e,#0a1a2a);
+  --border: rgba(255,45,120,0.3);
+  --border2: rgba(0,245,255,0.25);
+  --text: #e8e0ff;
+  --muted: #7a6a9a;
+  --glow1: 0 0 8px #ff2d78, 0 0 24px rgba(255,45,120,0.4);
+  --glow2: 0 0 8px #00f5ff, 0 0 24px rgba(0,245,255,0.35);
+  --glow3: 0 0 8px #b44fff, 0 0 20px rgba(180,79,255,0.3);
+  --scanline: rgba(255,45,120,0.03);
+  --grid-color: rgba(255,45,120,0.06);
+}
 
-/* ═══════════════════════════════════════════════════════════════
-   DATA
-═══════════════════════════════════════════════════════════════ */
-const DATA = {
+/* AURORA — emerald + violet neon */
+[data-theme="aurora"] {
+  --bg: #020d0a;
+  --bg2: #040f0c;
+  --surface: #061410;
+  --surface2: #0a1c18;
+  --neon1: #00ff88;
+  --neon2: #aa00ff;
+  --neon3: #00ccff;
+  --metal: linear-gradient(135deg,#021a0a,#0a0216,#021018);
+  --border: rgba(0,255,136,0.28);
+  --border2: rgba(170,0,255,0.22);
+  --text: #d0ffe8;
+  --muted: #4a7a62;
+  --glow1: 0 0 8px #00ff88, 0 0 28px rgba(0,255,136,0.35);
+  --glow2: 0 0 8px #aa00ff, 0 0 24px rgba(170,0,255,0.3);
+  --glow3: 0 0 8px #00ccff, 0 0 20px rgba(0,204,255,0.3);
+  --scanline: rgba(0,255,136,0.025);
+  --grid-color: rgba(0,255,136,0.05);
+}
+
+/* GOLD CHROME — molten gold + silver */
+[data-theme="chrome"] {
+  --bg: #080600;
+  --bg2: #0e0c01;
+  --surface: #110e02;
+  --surface2: #181300;
+  --neon1: #ffd700;
+  --neon2: #c0c0c0;
+  --neon3: #ff8c00;
+  --metal: linear-gradient(135deg,#1a1200,#1a1a1a,#120800);
+  --border: rgba(255,215,0,0.3);
+  --border2: rgba(192,192,192,0.22);
+  --text: #fff8dc;
+  --muted: #7a6a30;
+  --glow1: 0 0 8px #ffd700, 0 0 28px rgba(255,215,0,0.4);
+  --glow2: 0 0 8px #c0c0c0, 0 0 22px rgba(192,192,192,0.3);
+  --glow3: 0 0 8px #ff8c00, 0 0 22px rgba(255,140,0,0.35);
+  --scanline: rgba(255,215,0,0.025);
+  --grid-color: rgba(255,215,0,0.06);
+}
+
+/* TOXIC — acid green + orange */
+[data-theme="toxic"] {
+  --bg: #020800;
+  --bg2: #030c01;
+  --surface: #050f02;
+  --surface2: #091600;
+  --neon1: #aaff00;
+  --neon2: #ff6600;
+  --neon3: #00ffaa;
+  --metal: linear-gradient(135deg,#0a1400,#1a0800,#001a08);
+  --border: rgba(170,255,0,0.3);
+  --border2: rgba(255,102,0,0.25);
+  --text: #eeffcc;
+  --muted: #5a6a30;
+  --glow1: 0 0 8px #aaff00, 0 0 26px rgba(170,255,0,0.4);
+  --glow2: 0 0 8px #ff6600, 0 0 22px rgba(255,102,0,0.35);
+  --glow3: 0 0 8px #00ffaa, 0 0 20px rgba(0,255,170,0.3);
+  --scanline: rgba(170,255,0,0.025);
+  --grid-color: rgba(170,255,0,0.06);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanlines */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--scanline) 0px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--neon1); box-shadow: var(--glow1); }
+
+/* ═══════════════════════════════════════════════════
+   THEME SWITCHER
+═══════════════════════════════════════════════════ */
+.theme-switcher {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  display: flex;
+  gap: 7px;
+  z-index: 200;
+  align-items: center;
+}
+.theme-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin-right: 2px;
+}
+.theme-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.theme-dot:hover { transform: scale(1.25); }
+.theme-dot.t-cyberpunk { background: radial-gradient(circle at 35% 35%, #ff2d78, #b44fff); }
+.theme-dot.t-aurora    { background: radial-gradient(circle at 35% 35%, #00ff88, #aa00ff); }
+.theme-dot.t-chrome    { background: radial-gradient(circle at 35% 35%, #ffd700, #c0c0c0); }
+.theme-dot.t-toxic     { background: radial-gradient(circle at 35% 35%, #aaff00, #ff6600); }
+.theme-dot.active      { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.6); transform: scale(1.2); }
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--top-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 16px;
+  z-index: 100;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+/* Neon line at header bottom */
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon1), var(--neon2), transparent);
+  animation: scanH 4s linear infinite;
+}
+@keyframes scanH {
+  0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; }
+}
+
+.logo {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon1);
+  text-shadow: var(--glow1);
+  white-space: nowrap;
+}
+.logo span {
+  color: var(--neon2);
+  text-shadow: var(--glow2);
+}
+
+.logo-bracket {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.header-status {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--neon1);
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  animation: blink 1.8s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--neon1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: box-shadow 0.2s;
+}
+.hamburger:hover { box-shadow: var(--glow1); }
+
+/* ═══════════════════════════════════════════════════
+   TOP TABS
+═══════════════════════════════════════════════════ */
+.top-tabs {
+  position: fixed;
+  top: var(--top-h);
+  left: var(--nav-w);
+  right: 0;
+  height: var(--tab-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: stretch;
+  z-index: 90;
+  transition: left 0.3s;
+  overflow-x: auto;
+}
+.top-tabs::-webkit-scrollbar { height: 0; }
+
+.tab-btn {
+  font-family: var(--font-head);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0 24px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s, text-shadow 0.2s, border-color 0.2s, background 0.2s;
+  position: relative;
+}
+.tab-btn::before {
+  content: '//';
+  margin-right: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+}
+.tab-btn:hover::before, .tab-btn.active::before { opacity: 1; }
+.tab-btn:hover { color: var(--neon2); text-shadow: var(--glow2); }
+.tab-btn.active {
+  color: var(--neon1);
+  text-shadow: var(--glow1);
+  border-bottom-color: var(--neon1);
+  background: rgba(255,255,255,0.02);
+}
+
+/* ═══════════════════════════════════════════════════
+   LEFT NAV
+═══════════════════════════════════════════════════ */
+.left-nav {
+  position: fixed;
+  top: var(--top-h);
+  left: 0; bottom: 0;
+  width: var(--nav-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 95;
+  transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-nav::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -1px; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--neon1), var(--neon2), transparent);
+  opacity: 0.5;
+}
+
+.nav-section-title {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neon2);
+  text-shadow: var(--glow2);
+  padding: 20px 16px 8px;
+  opacity: 0.8;
+}
+.nav-section-title::before { content: '> '; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  border-left: 2px solid transparent;
+  transition: all 0.18s;
+  position: relative;
+}
+.nav-item:hover {
+  color: var(--neon2);
+  text-shadow: var(--glow2);
+  background: rgba(255,255,255,0.02);
+}
+.nav-item.active {
+  border-left-color: var(--neon1);
+  color: var(--neon1);
+  text-shadow: var(--glow1);
+  background: rgba(255,255,255,0.03);
+}
+
+.nav-icon {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  transition: filter 0.18s;
+}
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 4px var(--neon1)); }
+.nav-item:hover .nav-icon  { filter: drop-shadow(0 0 4px var(--neon2)); }
+
+.nav-sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding: 5px 16px 5px 46px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+}
+.nav-sub::before { content: '↳ '; font-size: 0.8em; }
+.nav-sub:hover { color: var(--neon3); border-left-color: var(--neon3); }
+.nav-sub.active { color: var(--neon1); border-left-color: var(--neon1); }
+
+.nav-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 10px 16px;
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════════════ */
+main {
+  margin-left: var(--nav-w);
+  margin-top: calc(var(--top-h) + var(--tab-h));
+  min-height: calc(100vh - var(--top-h) - var(--tab-h));
+  transition: margin-left 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-panel { display: none; padding: 36px 38px 70px; animation: fadeIn 0.3s ease; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════ */
+.hero {
+  margin-bottom: 46px;
+  position: relative;
+  padding: 32px;
+  border: 1px solid var(--border);
+  background: var(--metal);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon1), var(--neon2), var(--neon3));
+  box-shadow: 0 0 16px var(--neon1), 0 0 40px rgba(0,0,0,0.5);
+}
+
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--neon2);
+  text-shadow: var(--glow2);
+  margin-bottom: 14px;
+}
+
+.hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.hero-title .hl1 { color: var(--neon1); text-shadow: var(--glow1); }
+.hero-title .hl2 { color: var(--neon2); text-shadow: var(--glow2); }
+
+.hero-sub {
+  font-size: 0.95rem;
+  color: var(--muted);
+  max-width: 500px;
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+}
+
+.hero-corner {
+  position: absolute;
+  bottom: 18px; right: 22px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--neon3);
+  text-shadow: var(--glow3);
+  opacity: 0.5;
+  letter-spacing: 0.12em;
+}
+
+/* ═══════════════════════════════════════════════════
+   SECTION HEADERS
+═══════════════════════════════════════════════════ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  margin-top: 50px;
+}
+.section-header:first-of-type { margin-top: 0; }
+
+.section-title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.s-course .section-title { color: var(--neon2); text-shadow: var(--glow2); }
+.s-project .section-title { color: var(--neon3); text-shadow: var(--glow3); }
+.s-news .section-title { color: var(--neon1); text-shadow: var(--glow1); }
+
+.section-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  position: relative;
+  overflow: hidden;
+}
+.s-course .section-line { background: linear-gradient(90deg, var(--neon2), transparent); }
+.s-project .section-line { background: linear-gradient(90deg, var(--neon3), transparent); }
+.s-news .section-line { background: linear-gradient(90deg, var(--neon1), transparent); }
+
+/* ═══════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  cursor: pointer;
+  transition: transform 0.22s, box-shadow 0.22s;
+  position: relative;
+  overflow: hidden;
+  animation: cardIn 0.4s ease both;
+}
+.card:nth-child(1){animation-delay:0.05s}
+.card:nth-child(2){animation-delay:0.1s}
+.card:nth-child(3){animation-delay:0.15s}
+.card:nth-child(4){animation-delay:0.2s}
+.card:nth-child(5){animation-delay:0.25s}
+.card:nth-child(6){animation-delay:0.3s}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(20px) scale(0.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* Metallic sheen overlay */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+  pointer-events: none;
+}
+
+/* Top accent line */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  transition: opacity 0.2s;
+}
+.card.course::after  { background: linear-gradient(90deg, var(--neon2), transparent); }
+.card.project::after { background: linear-gradient(90deg, var(--neon3), transparent); }
+.card.news::after    { background: linear-gradient(90deg, var(--neon1), transparent); }
+
+.card:hover {
+  transform: translateY(-5px) scale(1.01);
+}
+.card.course:hover  { box-shadow: 0 0 0 1px var(--neon2), var(--glow2), 0 16px 40px rgba(0,0,0,0.6); border-color: var(--neon2); }
+.card.project:hover { box-shadow: 0 0 0 1px var(--neon3), var(--glow3), 0 16px 40px rgba(0,0,0,0.6); border-color: var(--neon3); }
+.card.news:hover    { box-shadow: 0 0 0 1px var(--neon1), var(--glow1), 0 16px 40px rgba(0,0,0,0.6); border-color: var(--neon1); }
+
+/* Corner bracket decoration */
+.card-bracket {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 16px; height: 16px;
+  opacity: 0.35;
+}
+.card.course  .card-bracket { color: var(--neon2); }
+.card.project .card-bracket { color: var(--neon3); }
+.card.news    .card-bracket { color: var(--neon1); }
+
+.card-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 13px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.card.course  .card-tag { color: var(--neon2); border: 1px solid var(--neon2); text-shadow: var(--glow2); background: rgba(0,245,255,0.06); }
+.card.project .card-tag { color: var(--neon3); border: 1px solid var(--neon3); text-shadow: var(--glow3); background: rgba(180,79,255,0.06); }
+.card.news    .card-tag { color: var(--neon1); border: 1px solid var(--neon1); text-shadow: var(--glow1); background: rgba(255,45,120,0.06); }
+
+.card-title {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.card-desc {
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-date {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.card-cta {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 2px;
+  border: 1px solid;
+  cursor: pointer;
+  background: none;
+  transition: all 0.18s;
+  text-transform: uppercase;
+}
+.card.course  .card-cta { color: var(--neon2); border-color: var(--neon2); }
+.card.project .card-cta { color: var(--neon3); border-color: var(--neon3); }
+.card.news    .card-cta { color: var(--neon1); border-color: var(--neon1); }
+.card.course:hover  .card-cta { background: var(--neon2); color: var(--bg); box-shadow: var(--glow2); }
+.card.project:hover .card-cta { background: var(--neon3); color: var(--bg); box-shadow: var(--glow3); }
+.card.news:hover    .card-cta { background: var(--neon1); color: var(--bg); box-shadow: var(--glow1); }
+
+/* ═══════════════════════════════════════════════════
+   DETAIL PAGE
+═══════════════════════════════════════════════════ */
+#detail-page {
+  display: none;
+  margin-left: var(--nav-w);
+  margin-top: calc(var(--top-h) + var(--tab-h));
+  min-height: calc(100vh - var(--top-h) - var(--tab-h));
+  position: relative; z-index: 1;
+  transition: margin-left 0.3s;
+}
+#detail-page.visible { display: block; animation: fadeIn 0.3s ease; }
+
+.detail-inner { padding: 40px 42px 80px; max-width: 820px; }
+
+.back-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-bottom: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.back-btn:hover { color: var(--neon1); border-color: var(--neon1); box-shadow: var(--glow1); }
+
+.detail-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 2px;
+  border: 1px solid;
+  display: inline-block;
+  margin-bottom: 18px;
+}
+.detail-tag.course  { color: var(--neon2); border-color: var(--neon2); text-shadow: var(--glow2); }
+.detail-tag.project { color: var(--neon3); border-color: var(--neon3); text-shadow: var(--glow3); }
+.detail-tag.news    { color: var(--neon1); border-color: var(--neon1); text-shadow: var(--glow1); }
+
+.detail-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.detail-title .glow { color: var(--neon1); text-shadow: var(--glow1); }
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.detail-date {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-divider {
+  height: 1px;
+  background: linear-gradient(90deg, var(--neon1), var(--neon2), transparent);
+  box-shadow: 0 0 8px var(--neon1);
+  margin-bottom: 34px;
+}
+
+.detail-body {
+  font-size: 0.97rem;
+  line-height: 1.9;
+  color: rgba(220,210,255,0.8);
+  letter-spacing: 0.02em;
+}
+[data-theme="chrome"] .detail-body { color: rgba(255,248,220,0.8); }
+[data-theme="aurora"] .detail-body { color: rgba(210,255,230,0.8); }
+[data-theme="toxic"]  .detail-body { color: rgba(230,255,200,0.8); }
+
+.detail-body p { margin-bottom: 18px; }
+.detail-body h3 {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--neon2);
+  text-shadow: var(--glow2);
+  margin: 32px 0 12px;
+}
+
+/* ═══════════════════════════════════════════════════
+   OTHER PANELS
+═══════════════════════════════════════════════════ */
+.panel-wrap { max-width: 660px; }
+.panel-wrap h2 {
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--neon1);
+  text-shadow: var(--glow1);
+  margin-bottom: 16px;
+}
+.panel-wrap p { color: var(--muted); line-height: 1.75; margin-bottom: 14px; font-size: 0.95rem; }
+
+.contact-form { margin-top: 30px; display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
+.contact-form input,
+.contact-form textarea {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--neon2);
+  box-shadow: var(--glow2), inset 0 0 20px rgba(0,0,0,0.3);
+}
+.contact-form textarea { resize: vertical; min-height: 110px; }
+.contact-form button {
+  font-family: var(--font-head);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--neon1);
+  border: 1px solid var(--neon1);
+  border-radius: 3px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.22s;
+}
+.contact-form button:hover {
+  background: var(--neon1);
+  color: var(--bg);
+  box-shadow: var(--glow1);
+}
+
+.coming-soon {
+  margin-top: 30px;
+  padding: 30px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--neon3);
+  text-shadow: var(--glow3);
+  letter-spacing: 0.08em;
+  background: var(--surface);
+  animation: pulse 3s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+/* ═══════════════════════════════════════════════════
+   OVERLAY + RESPONSIVE
+═══════════════════════════════════════════════════ */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(2px);
+  z-index: 85;
+}
+.overlay.show { display: block; }
+
+@media (max-width: 768px) {
+  .left-nav { transform: translateX(-100%); }
+  .left-nav.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.8); }
+  .top-tabs { left: 0; }
+  main, #detail-page { margin-left: 0; }
+  .hamburger { display: block; }
+  .tab-panel { padding: 22px 18px 60px; }
+  .detail-inner { padding: 24px 18px 60px; }
+  .theme-label { display: none; }
+  .hero { padding: 22px 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeNav()"></div>
+
+<!-- THEME SWITCHER -->
+<div class="theme-switcher">
+  <span class="theme-label">THEME://</span>
+  <div class="theme-dot t-cyberpunk active" title="Cyberpunk" onclick="setTheme('cyberpunk',this)"></div>
+  <div class="theme-dot t-aurora"    title="Aurora"    onclick="setTheme('aurora',this)"></div>
+  <div class="theme-dot t-chrome"    title="Chrome"    onclick="setTheme('chrome',this)"></div>
+  <div class="theme-dot t-toxic"     title="Toxic"     onclick="setTheme('toxic',this)"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <button class="hamburger" onclick="toggleNav()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <div class="logo"><span class="logo-bracket">[</span>LEARN<span>HUB</span><span class="logo-bracket">]</span></div>
+  <div class="header-status">● ONLINE</div>
+</header>
+
+<!-- TOP TABS -->
+<nav class="top-tabs" id="topTabs">
+  <button class="tab-btn active" onclick="showTab('notes',this)">Notes</button>
+  <button class="tab-btn" onclick="showTab('videos',this)">Videos</button>
+  <button class="tab-btn" onclick="showTab('contact',this)">Contact Us</button>
+  <button class="tab-btn" onclick="showTab('about',this)">About</button>
+</nav>
+
+<!-- LEFT NAV -->
+<aside class="left-nav" id="leftNav">
+  <div class="nav-section-title">System</div>
+
+  <div class="nav-item active" id="nav-notes" onclick="showTab('notes'); closeNav();">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+    </svg>
+    Notes
+  </div>
+
+  <div class="nav-item" id="nav-videos" onclick="showTab('videos'); closeNav();">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="23 7 16 12 23 17 23 7"/>
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+    </svg>
+    Videos
+  </div>
+
+  <div class="nav-item" id="nav-contact" onclick="showTab('contact'); closeNav();">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16.92V19a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9a2 2 0 0 1 1.95-2.18h2.09a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .66 2.67 2 2 0 0 1-.45 2.11L9.91 14.09a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.05 12.05 0 0 0 2.67.66A2 2 0 0 1 22 16.92z"/>
+    </svg>
+    Contact Us
+  </div>
+
+  <div class="nav-item" id="nav-about" onclick="showTab('about'); closeNav();">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    About
+  </div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section-title">Topics</div>
+
+  <div class="nav-item" id="nav-courses" onclick="goSection('courses')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+    Courses
+  </div>
+
+  <div class="nav-item" id="nav-projects" onclick="goSection('projects')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="16 18 22 12 16 6"/>
+      <polyline points="8 6 2 12 8 18"/>
+    </svg>
+    Projects
+  </div>
+
+  <div class="nav-item" id="nav-news-sec" onclick="goSection('news')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/>
+      <path d="M4 11h8"/><path d="M4 15h4"/><path d="M4 19h4"/>
+      <rect x="2" y="7" width="4" height="4"/>
+    </svg>
+    News
+  </div>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section-title" id="recent-label">Recent</div>
+  <div id="recent-nav"></div>
+</aside>
+
+<!-- MAIN -->
+<main id="mainContent">
+
+  <!-- NOTES TAB -->
+  <section class="tab-panel active" id="tab-notes">
+
+    <div class="hero">
+      <div class="hero-tag">// SYS.INIT — KNOWLEDGE_BASE v2.0</div>
+      <h1 class="hero-title">
+        <span class="hl1">EXPLORE</span> &amp; <span class="hl2">LEARN</span><br/>
+        THE FUTURE
+      </h1>
+      <p class="hero-sub">Your neon-lit portal for curated courses, cutting-edge projects and real-time news. Jack in.</p>
+      <div class="hero-corner">NODE_ID: LH-7734 // STATUS: ACTIVE</div>
+    </div>
+
+    <!-- COURSES -->
+    <div id="courses">
+      <div class="section-header s-course">
+        <h2 class="section-title">// Courses</h2>
+        <span class="section-count">06 ENTRIES</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="coursesGrid"></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="projects">
+      <div class="section-header s-project">
+        <h2 class="section-title">// Projects</h2>
+        <span class="section-count">04 ENTRIES</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="projectsGrid"></div>
+    </div>
+
+    <!-- NEWS -->
+    <div id="news">
+      <div class="section-header s-news">
+        <h2 class="section-title">// News</h2>
+        <span class="section-count">05 ENTRIES</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="newsGrid"></div>
+    </div>
+  </section>
+
+  <!-- VIDEOS TAB -->
+  <section class="tab-panel" id="tab-videos">
+    <div class="panel-wrap">
+      <h2>Video Library</h2>
+      <p>Curated video lessons, walkthroughs, and recorded lectures from top educators and practitioners — all in one encrypted node.</p>
+      <div class="coming-soon">▶ &nbsp; SIGNAL INCOMING... CONTENT LOADING... ETA: SOON™</div>
+    </div>
+  </section>
+
+  <!-- CONTACT TAB -->
+  <section class="tab-panel" id="tab-contact">
+    <div class="panel-wrap">
+      <h2>Contact Us</h2>
+      <p>Transmit your query through the secure channel below. We'll respond on the next uplink cycle.</p>
+      <form class="contact-form" onsubmit="return false">
+        <input type="text" placeholder="> OPERATOR_NAME" />
+        <input type="email" placeholder="> EMAIL_ADDRESS" />
+        <input type="text" placeholder="> SUBJECT_LINE" />
+        <textarea placeholder="> BEGIN_MESSAGE.."></textarea>
+        <button type="submit">TRANSMIT →</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ABOUT TAB -->
+  <section class="tab-panel" id="tab-about">
+    <div class="panel-wrap">
+      <h2>About</h2>
+      <p>CodeEasy is a next-generation knowledge platform built for learners, developers, and curious minds navigating the digital frontier.</p>
+      <p>Access structured courses, meaningful projects, and up-to-date intel — all through a single hardened interface. Dark. Fast. Reliable.</p>
+      <p style="font-family:var(--font-mono);font-size:0.75rem;color:var(--neon2);letter-spacing:0.1em;">BUILD: 2.0.0-NEON &nbsp;·&nbsp; CORE: STABLE &nbsp;·&nbsp; ☕ POWERED</p>
+    </div>
+  </section>
+</main>
+
+<!-- DETAIL PAGE -->
+<div id="detail-page">
+  <div class="detail-inner">
+    <button class="back-btn" onclick="closeDetail()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      ← BACK
+    </button>
+    <div class="detail-tag" id="detail-tag">course</div>
+    <h1 class="detail-title" id="detail-title"></h1>
+    <div class="detail-meta">
+      <div class="detail-date">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="detail-date"></span>
+      </div>
+    </div>
+    <div class="detail-divider"></div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────
+const data = {
   courses: [
-    { id:"c1", type:"course", title:"Full-Stack Web Dev", date:"March 10, 2025", desc:"Build production-ready apps with React, Node.js, and PostgreSQL from scratch.", body:"<p>This comprehensive course takes you from zero to deploying production-ready full-stack applications across the entire modern stack.</p><h3>What You'll Learn</h3><p>You'll master React for frontend, Express and Node.js for backend APIs, and PostgreSQL as your database layer. Authentication, REST design, and cloud deployment are all covered.</p><h3>Prerequisites</h3><p>Basic HTML, CSS, and JavaScript knowledge is recommended. We revisit fundamentals before going deep.</p>" },
-    { id:"c2", type:"course", title:"Machine Learning Core", date:"February 22, 2025", desc:"Core ML concepts — regression, classification, clustering, and neural networks.", body:"<p>Dive into the mathematics and intuition behind machine learning algorithms deployed in industry every day.</p><h3>Topics Covered</h3><p>Linear regression, logistic regression, decision trees, SVMs, k-means clustering, and an introduction to deep learning with PyTorch.</p>" },
-    { id:"c3", type:"course", title:"UI/UX Design Systems", date:"January 15, 2025", desc:"Master design thinking, wireframing, prototyping, and usability testing.", body:"<p>Great products start with great design. This course teaches the frameworks professional designers use every day — from discovery to delivery.</p><h3>Tools</h3><p>Figma, Maze for testing, and design tokens for scalable systems.</p>" },
-    { id:"c4", type:"course", title:"Cloud Architecture — AWS", date:"March 1, 2025", desc:"Design scalable, resilient systems using AWS services and best practices.", body:"<p>Architect systems that scale to millions of users on AWS infrastructure. Covers EC2, S3, Lambda, RDS, CloudFront, IAM, and more.</p><h3>Certification Path</h3><p>This course aligns with the AWS Solutions Architect Associate exam objectives.</p>" },
-    { id:"c5", type:"course", title:"Data Structures & Algo", date:"December 5, 2024", desc:"Essential CS fundamentals for coding interviews and efficient engineering.", body:"<p>Arrays, linked lists, trees, graphs, dynamic programming — all mastered systematically with coded practice and clear explanations.</p>" },
-    { id:"c6", type:"course", title:"Python for Data Science", date:"November 18, 2024", desc:"Pandas, NumPy, Matplotlib, and Seaborn for real-world data analysis.", body:"<p>The full Python data science toolkit explored through hands-on projects using real datasets from Kaggle and public APIs.</p>" },
+    { id:'c1', type:'course', title:'Full-Stack Web Dev', date:'March 10, 2025', desc:'Build production-ready apps from scratch with React, Node.js, and PostgreSQL.', body:'<p>This comprehensive course takes you from zero to deploying production-ready full-stack applications across the entire modern stack.</p><h3>What You\'ll Learn</h3><p>You\'ll master React for frontend, Express and Node.js for backend APIs, and PostgreSQL as your database layer. Authentication, REST design, and cloud deployment included.</p><h3>Prerequisites</h3><p>Basic HTML, CSS, and JavaScript knowledge is recommended. We revisit fundamentals before going deep.</p>' },
+    { id:'c2', type:'course', title:'Machine Learning Core', date:'February 22, 2025', desc:'Core ML concepts — regression, classification, clustering, and neural networks.', body:'<p>Dive into the mathematics and intuition behind machine learning algorithms deployed in industry every day.</p><h3>Topics Covered</h3><p>Linear regression, logistic regression, decision trees, SVMs, k-means clustering, and an introduction to deep learning with PyTorch.</p>' },
+    { id:'c3', type:'course', title:'UI/UX Design Systems', date:'January 15, 2025', desc:'Master design thinking, wireframing, prototyping, and usability testing.', body:'<p>Great products start with great design. This course teaches the frameworks professional designers use every day — from discovery to delivery.</p><h3>Tools</h3><p>Figma, Maze for testing, and design tokens for scalable systems. No Photoshop era mindset here.</p>' },
+    { id:'c4', type:'course', title:'Cloud Arch — AWS', date:'March 1, 2025', desc:'Design scalable, resilient systems using AWS services and best practices.', body:'<p>Architect systems that scale to millions of users on AWS infrastructure. Covers EC2, S3, Lambda, RDS, CloudFront, IAM, and more.</p><h3>Certification Path</h3><p>This course aligns with the AWS Solutions Architect Associate exam objectives.</p>' },
+    { id:'c5', type:'course', title:'Data Structures & Algo', date:'December 5, 2024', desc:'Essential CS fundamentals for coding interviews and efficient engineering.', body:'<p>Arrays, linked lists, trees, graphs, dynamic programming — all mastered systematically with coded practice and clear explanations.</p>' },
+    { id:'c6', type:'course', title:'Python for Data Science', date:'November 18, 2024', desc:'Pandas, NumPy, Matplotlib, and Seaborn for real-world data analysis.', body:'<p>The full Python data science toolkit explored through hands-on projects using real datasets from Kaggle and public APIs. No fluff.</p>' },
   ],
   projects: [
-    { id:"p1", type:"project", title:"AI-Powered Task Manager", date:"March 18, 2025", desc:"Open-source LLM-powered Kanban board for smart productivity workflows.", body:"<p>Integrates Claude and GPT-4 with a custom Kanban interface to auto-prioritize tasks, draft descriptions, and estimate completion time.</p><h3>Tech Stack</h3><p>React, FastAPI, PostgreSQL, Anthropic API, OpenAI API, Docker. Fully open source on GitHub.</p>" },
-    { id:"p2", type:"project", title:"Open Source Design System", date:"February 28, 2025", desc:"A reusable component library with accessibility-first design for modern apps.", body:"<p>Built by 40+ contributors. 80+ accessible components with Figma integration and support for React, Vue, and Angular.</p>" },
-    { id:"p3", type:"project", title:"Climate Data Visualizer", date:"January 30, 2025", desc:"Interactive global climate charts powered by NASA and NOAA public datasets.", body:"<p>Explore temperature anomalies, CO₂ levels, sea level rise, and extreme weather on an interactive 3D globe built with Three.js.</p>" },
-    { id:"p4", type:"project", title:"P2P Study Platform", date:"March 5, 2025", desc:"Connect with learners worldwide for collaborative sessions and note sharing.", body:"<p>Real-time collaborative notes, video study rooms, and a matching algorithm pairing you with learners on the same topics.</p>" },
+    { id:'p1', type:'project', title:'AI-Powered Task Manager', date:'March 18, 2025', desc:'Open-source project combining LLMs with Kanban boards for smart productivity.', body:'<p>Integrates Claude and GPT-4 with a custom Kanban interface to auto-prioritize tasks, draft descriptions, and estimate time to completion.</p><h3>Tech Stack</h3><p>React, FastAPI, PostgreSQL, Anthropic API, OpenAI API, Docker. Fully open source on GitHub.</p>' },
+    { id:'p2', type:'project', title:'Open Source Design System', date:'February 28, 2025', desc:'A reusable component library with accessibility-first design for modern apps.', body:'<p>Built by 40+ contributors. 80+ accessible components with Figma integration and support for React, Vue, and Angular.</p>' },
+    { id:'p3', type:'project', title:'Climate Data Visualizer', date:'January 30, 2025', desc:'Interactive global climate charts powered by NASA and NOAA public datasets.', body:'<p>Explore temperature anomalies, CO₂ levels, sea level rise, and extreme weather events on an interactive 3D globe built with Three.js.</p>' },
+    { id:'p4', type:'project', title:'P2P Study Platform', date:'March 5, 2025', desc:'Connect with learners worldwide for collaborative study sessions and notes.', body:'<p>Real-time collaborative notes, video study rooms, and a matching algorithm pairing you with learners on the same topics at compatible times.</p>' },
   ],
   news: [
-    { id:"n1", type:"news", title:"AI Curriculum Goes Global", date:"March 20, 2025", desc:"Major universities announce joint AI literacy programs for undergrad students.", body:"<p>Harvard, MIT, Stanford, and 40 partners unveiled a shared AI literacy curriculum reaching 200,000+ undergraduates next academic year.</p><h3>What's Included</h3><p>AI ethics, prompt engineering, building with LLMs, and AI safety — freely available under Creative Commons.</p>" },
-    { id:"n2", type:"news", title:"Open Models Close the Gap", date:"March 12, 2025", desc:"Community-trained models now rival commercial offerings on key benchmarks.", body:"<p>Several community-trained models now match or exceed commercial performance on MMLU, HumanEval, and reasoning benchmarks.</p>" },
-    { id:"n3", type:"news", title:"EdTech Funding Record", date:"February 14, 2025", desc:"Global EdTech investment surpassed $8B in Q1 2025 — a historic high.", body:"<p>Venture capital poured record sums into education technology in Q1 2025, with AI-personalized learning platforms leading the category.</p>" },
-    { id:"n4", type:"news", title:"Bootcamps Hit 94% Placement", date:"January 22, 2025", desc:"Six-month intensive programs post highest job placement rates in five years.", body:"<p>A survey of 120 coding bootcamps found average job placement of 94% within six months — the highest since 2020.</p>" },
-    { id:"n5", type:"news", title:"Web Standards 2025", date:"March 8, 2025", desc:"CSS anchor positioning, View Transitions API, and Baseline 2025 highlights.", body:"<p>The W3C advances CSS anchor positioning, View Transitions for smooth native page animations, and the Baseline 2025 feature set.</p>" },
+    { id:'n1', type:'news', title:'AI Curriculum Goes Global', date:'March 20, 2025', desc:'Major universities announce joint AI literacy programs for undergrad students.', body:'<p>Harvard, MIT, Stanford, and 40 partner institutions unveiled a shared AI literacy curriculum reaching 200,000+ undergraduates next academic year.</p><h3>What\'s Included</h3><p>AI ethics, prompt engineering, building with LLMs, and AI safety — freely available under Creative Commons.</p>' },
+    { id:'n2', type:'news', title:'Open Models Close the Gap', date:'March 12, 2025', desc:'Community-trained models now rival commercial offerings on key benchmarks.', body:'<p>The open source community hit a milestone: several community-trained models now match or exceed commercial performance on MMLU, HumanEval, and reasoning benchmarks.</p>' },
+    { id:'n3', type:'news', title:'EdTech Funding Record', date:'February 14, 2025', desc:'Global EdTech investment surpassed $8B in Q1 2025, driven by AI learning tools.', body:'<p>Venture capital poured record sums into education technology in Q1 2025, with AI-personalized learning platforms leading the category by a wide margin.</p>' },
+    { id:'n4', type:'news', title:'Bootcamps Hit 94% Placement', date:'January 22, 2025', desc:'Six-month intensive programs post highest job placement rates in five years.', body:'<p>A survey of 120 coding bootcamps across North America and Europe found average job placement rates of 94% within six months — the highest since 2020.</p>' },
+    { id:'n5', type:'news', title:'Web Standards 2025', date:'March 8, 2025', desc:'CSS anchor positioning, View Transitions API, and Baseline 2025 highlights.', body:'<p>The W3C advances CSS anchor positioning, View Transitions for smooth native page animations, and the Baseline 2025 feature set. A landmark year for the web platform.</p>' },
   ],
 };
-const ALL_ITEMS = {};
-[...DATA.courses, ...DATA.projects, ...DATA.news].forEach(i => ALL_ITEMS[i.id] = i);
 
-/* ═══════════════════════════════════════════════════════════════
-   CONTEXT
-═══════════════════════════════════════════════════════════════ */
-const AppContext = createContext(null);
+const allItems = {};
+[...data.courses, ...data.projects, ...data.news].forEach(i => allItems[i.id] = i);
+const recentlyViewed = [];
 
-/* ═══════════════════════════════════════════════════════════════
-   GLOBAL STYLES (injected once)
-═══════════════════════════════════════════════════════════════ */
-const GlobalStyles = ({ t }) => {
-  useEffect(() => {
-    const id = "ce-styles";
-    let el = document.getElementById(id);
-    if (!el) { el = document.createElement("style"); el.id = id; document.head.appendChild(el); }
-    el.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap');
-      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      html{scroll-behavior:smooth}
-      body{font-family:'Rajdhani',sans-serif;background:${t.bg};color:${t.text};min-height:100vh;overflow-x:hidden;cursor:crosshair;transition:background 0.4s,color 0.4s}
-      body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(${t.grid} 1px,transparent 1px),linear-gradient(90deg,${t.grid} 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;transition:background-image 0.4s}
-      body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,${t.scanline} 0px,transparent 1px,transparent 3px);pointer-events:none;z-index:0}
-      ::-webkit-scrollbar{width:4px}
-      ::-webkit-scrollbar-track{background:${t.bg}}
-      ::-webkit-scrollbar-thumb{background:${t.neon1};box-shadow:${t.glow1}}
-      @keyframes fadeUp{from{opacity:0;transform:translateY(20px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-      @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-      @keyframes scanH{0%{opacity:0.5}50%{opacity:1}100%{opacity:0.5}}
-      @keyframes blink{50%{opacity:0}}
-      @keyframes pulse{0%,100%{opacity:0.7}50%{opacity:1}}
-      @keyframes glow-flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.4}96%{opacity:1}98%{opacity:0.5}}
-    `;
-    const link = document.querySelector("link[data-ce-font]");
-    if (!link) {
-      const l = document.createElement("link");
-      l.rel = "stylesheet"; l.dataset.ceFont = "1";
-      l.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&family=Share+Tech+Mono&display=swap";
-      document.head.appendChild(l);
-    }
-  }, [t]);
-  return null;
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   ICON SVGs
-═══════════════════════════════════════════════════════════════ */
-const Icon = {
-  notes: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-  videos: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
-  contact: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92V19a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9a2 2 0 0 1 1.95-2.18h2.09a2 2 0 0 1 2 1.72 12.05 12.05 0 0 0 .66 2.67 2 2 0 0 1-.45 2.11L9.91 14.09a16 16 0 0 0 6 6z"/></svg>,
-  about: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-  courses: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-  projects: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
-  news: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/><path d="M4 11h8"/><path d="M4 15h4"/><path d="M4 19h4"/><rect x="2" y="7" width="4" height="4"/></svg>,
-  back: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
-  cal: () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-  menu: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
-  close: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-  twitter: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
-  github: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>,
-  discord: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.101 18.08.114 18.1.134 18.115a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>,
-  youtube: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>,
-  arrow: () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
-  send: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   CARD COMPONENT
-═══════════════════════════════════════════════════════════════ */
-const Card = ({ item, onOpen, delay = 0 }) => {
-  const { t } = useContext(AppContext);
-  const colors = {
-    course:  { neon: t.neon2, glow: t.glow2, bg: `${t.neon2}0f` },
-    project: { neon: t.neon3, glow: t.glow3, bg: `${t.neon3}0f` },
-    news:    { neon: t.neon1, glow: t.glow1, bg: `${t.neon1}0f` },
-  };
-  const c = colors[item.type] || colors.news;
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      onClick={() => onOpen(item.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: t.surface,
-        border: `1px solid ${hovered ? c.neon : t.border}`,
-        borderRadius: 6,
-        padding: 22,
-        cursor: "pointer",
-        position: "relative",
-        overflow: "hidden",
-        transition: "transform 0.22s, box-shadow 0.22s, border-color 0.22s",
-        transform: hovered ? "translateY(-5px) scale(1.01)" : "translateY(0) scale(1)",
-        boxShadow: hovered ? `${c.glow}, 0 16px 40px rgba(0,0,0,0.6)` : "none",
-        animation: `fadeUp 0.4s ease ${delay}s both`,
-      }}
-    >
-      {/* metallic sheen */}
-      <div style={{ position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(255,255,255,0.04) 0%,transparent 50%,rgba(0,0,0,0.1) 100%)",pointerEvents:"none" }}/>
-      {/* top line */}
-      <div style={{ position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c.neon},transparent)` }}/>
-      {/* corner */}
-      <div style={{ position:"absolute",top:10,right:10,color:c.neon,opacity:0.35 }}><Icon.arrow /></div>
-
-      <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.62rem",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:13,display:"inline-block",padding:"2px 8px",borderRadius:2,color:c.neon,border:`1px solid ${c.neon}`,textShadow:c.glow,background:c.bg }}>
-        {item.type}
+// ── RENDER CARD ───────────────────────────────────────────────────
+function renderCard(item) {
+  return `
+  <div class="card ${item.type}" onclick="openDetail('${item.id}')">
+    <svg class="card-bracket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+    <div class="card-tag">${item.type.toUpperCase()}</div>
+    <div class="card-title">${item.title}</div>
+    <div class="card-desc">${item.desc}</div>
+    <div class="card-footer">
+      <div class="card-date">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${item.date}
       </div>
-      <div style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"0.9rem",fontWeight:700,letterSpacing:"0.04em",lineHeight:1.35,marginBottom:10,color:t.text,textTransform:"uppercase" }}>
-        {item.title}
-      </div>
-      <div style={{ fontSize:"0.84rem",color:t.muted,lineHeight:1.65,marginBottom:20,letterSpacing:"0.02em" }}>
-        {item.desc}
-      </div>
-      <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between" }}>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.68rem",color:t.muted,display:"flex",alignItems:"center",gap:5 }}>
-          <Icon.cal /> {item.date}
-        </div>
-        <button
-          style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",letterSpacing:"0.1em",padding:"4px 10px",borderRadius:2,border:`1px solid ${c.neon}`,background:hovered ? c.neon : "transparent",color:hovered ? t.bg : c.neon,cursor:"pointer",textTransform:"uppercase",transition:"all 0.18s",boxShadow:hovered ? c.glow : "none" }}
-        >ACCESS →</button>
-      </div>
+      <button class="card-cta" onclick="openDetail('${item.id}')">ACCESS →</button>
     </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   SECTION HEADER
-═══════════════════════════════════════════════════════════════ */
-const SectionHeader = ({ label, count, neon, glow }) => (
-  <div style={{ display:"flex",alignItems:"center",gap:14,marginBottom:22,marginTop:50 }}>
-    <h2 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"1rem",fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",whiteSpace:"nowrap",color:neon,textShadow:glow }}>
-      // {label}
-    </h2>
-    <span style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",color:"var(--muted,#7a6a9a)",padding:"2px 8px",borderRadius:3 }}>
-      {count}
-    </span>
-    <div style={{ flex:1,height:1,background:`linear-gradient(90deg,${neon},transparent)` }}/>
-  </div>
-);
-
-/* ═══════════════════════════════════════════════════════════════
-   DETAIL PAGE
-═══════════════════════════════════════════════════════════════ */
-const DetailPage = ({ itemId, onBack }) => {
-  const { t } = useContext(AppContext);
-  const item = ALL_ITEMS[itemId];
-  if (!item) return null;
-  const colors = {
-    course:  { neon: t.neon2, glow: t.glow2 },
-    project: { neon: t.neon3, glow: t.glow3 },
-    news:    { neon: t.neon1, glow: t.glow1 },
-  };
-  const c = colors[item.type] || colors.news;
-
-  return (
-    <div style={{ padding:"40px 42px 80px",maxWidth:820,animation:"fadeIn 0.3s ease" }}>
-      <button
-        onClick={onBack}
-        style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.72rem",letterSpacing:"0.1em",color:t.muted,background:"none",border:`1px solid ${t.border}`,padding:"7px 14px",borderRadius:3,cursor:"pointer",marginBottom:40,display:"inline-flex",alignItems:"center",gap:7,transition:"all 0.2s",textTransform:"uppercase" }}
-        onMouseEnter={e=>{ e.currentTarget.style.color=t.neon1; e.currentTarget.style.borderColor=t.neon1; e.currentTarget.style.boxShadow=t.glow1; }}
-        onMouseLeave={e=>{ e.currentTarget.style.color=t.muted; e.currentTarget.style.borderColor=t.border; e.currentTarget.style.boxShadow="none"; }}
-      >
-        <Icon.back /> ← BACK
-      </button>
-
-      <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",letterSpacing:"0.15em",textTransform:"uppercase",padding:"3px 12px",borderRadius:2,border:`1px solid ${c.neon}`,display:"inline-block",marginBottom:18,color:c.neon,textShadow:c.glow }}>
-        {item.type}
-      </div>
-
-      <h1 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"clamp(1.6rem,3.5vw,2.6rem)",fontWeight:900,letterSpacing:"0.05em",lineHeight:1.15,textTransform:"uppercase",color:t.text,marginBottom:18 }}>
-        {item.title}
-      </h1>
-
-      <div style={{ display:"flex",alignItems:"center",gap:6,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.72rem",color:t.muted,marginBottom:28 }}>
-        <Icon.cal /> {item.date}
-      </div>
-
-      <div style={{ height:1,background:`linear-gradient(90deg,${t.neon1},${t.neon2},transparent)`,boxShadow:`0 0 8px ${t.neon1}`,marginBottom:32 }}/>
-
-      <div
-        style={{ fontSize:"0.97rem",lineHeight:1.9,color:t.text,opacity:0.82,letterSpacing:"0.02em" }}
-        dangerouslySetInnerHTML={{ __html: item.body.replace(/<h3>/g,`<h3 style="font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${c.neon};text-shadow:${c.glow};margin:28px 0 12px;">`) }}
-      />
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   NOTES PAGE (HOME)
-═══════════════════════════════════════════════════════════════ */
-const NotesPage = ({ onOpenDetail }) => {
-  const { t } = useContext(AppContext);
-  return (
-    <div style={{ padding:"36px 38px 70px",animation:"fadeIn 0.3s ease" }}>
-      {/* Hero */}
-      <div style={{ marginBottom:46,padding:32,border:`1px solid ${t.border}`,background:t.metal,borderRadius:6,position:"relative",overflow:"hidden" }}>
-        <div style={{ position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${t.neon1},${t.neon2},${t.neon3})`,boxShadow:`0 0 16px ${t.neon1}`,animation:"scanH 4s linear infinite" }}/>
-        <div style={{ position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(255,255,255,0.03) 0%,transparent 60%)",pointerEvents:"none" }}/>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.68rem",letterSpacing:"0.16em",color:t.neon2,textShadow:t.glow2,marginBottom:14 }}>// SYS.INIT — KNOWLEDGE_BASE v2.0</div>
-        <h1 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,lineHeight:1.1,letterSpacing:"0.05em",textTransform:"uppercase",color:t.text,marginBottom:14 }}>
-          <span style={{ color:t.neon1,textShadow:t.glow1 }}>EXPLORE</span> &amp; <span style={{ color:t.neon2,textShadow:t.glow2 }}>LEARN</span><br/>THE FUTURE
-        </h1>
-        <p style={{ fontSize:"0.95rem",color:t.muted,maxWidth:500,lineHeight:1.7,letterSpacing:"0.03em" }}>Your neon-lit portal for curated courses, cutting-edge projects and real-time news. Jack in.</p>
-        <div style={{ position:"absolute",bottom:16,right:20,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",color:t.neon3,textShadow:t.glow3,opacity:0.5,letterSpacing:"0.12em" }}>NODE_ID: CE-7734 // STATUS: ACTIVE</div>
-      </div>
-
-      {/* Courses */}
-      <div id="courses">
-        <SectionHeader label="Courses" count="06 ENTRIES" neon={t.neon2} glow={t.glow2} />
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:18,marginBottom:8 }}>
-          {DATA.courses.map((item,i) => <Card key={item.id} item={item} onOpen={onOpenDetail} delay={i*0.05} />)}
-        </div>
-      </div>
-
-      {/* Projects */}
-      <div id="projects">
-        <SectionHeader label="Projects" count="04 ENTRIES" neon={t.neon3} glow={t.glow3} />
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:18,marginBottom:8 }}>
-          {DATA.projects.map((item,i) => <Card key={item.id} item={item} onOpen={onOpenDetail} delay={i*0.05} />)}
-        </div>
-      </div>
-
-      {/* News */}
-      <div id="news">
-        <SectionHeader label="News" count="05 ENTRIES" neon={t.neon1} glow={t.glow1} />
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:18,marginBottom:8 }}>
-          {DATA.news.map((item,i) => <Card key={item.id} item={item} onOpen={onOpenDetail} delay={i*0.05} />)}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   VIDEOS PAGE
-═══════════════════════════════════════════════════════════════ */
-const VideosPage = () => {
-  const { t } = useContext(AppContext);
-  const videos = [
-    { id:1, title:"Intro to React Hooks", dur:"12:34", views:"24K", thumb:"🎬" },
-    { id:2, title:"CSS Grid Masterclass", dur:"28:10", views:"18K", thumb:"🎨" },
-    { id:3, title:"Python Async Deep Dive", dur:"45:02", views:"31K", thumb:"🐍" },
-    { id:4, title:"Docker for Developers", dur:"33:15", views:"15K", thumb:"🐳" },
-    { id:5, title:"TypeScript Fundamentals", dur:"22:00", views:"28K", thumb:"📘" },
-    { id:6, title:"GraphQL vs REST", dur:"18:44", views:"12K", thumb:"⚡" },
-  ];
-  return (
-    <div style={{ padding:"36px 38px 70px",animation:"fadeIn 0.3s ease" }}>
-      <div style={{ marginBottom:36 }}>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.68rem",letterSpacing:"0.16em",color:t.neon2,textShadow:t.glow2,marginBottom:10 }}>// VIDEO_LIBRARY v1.0</div>
-        <h1 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"2rem",fontWeight:900,letterSpacing:"0.08em",textTransform:"uppercase",color:t.text,marginBottom:10 }}>
-          <span style={{ color:t.neon1,textShadow:t.glow1 }}>VIDEO</span> LIBRARY
-        </h1>
-        <p style={{ color:t.muted,lineHeight:1.7,fontSize:"0.95rem" }}>Curated lessons, walkthroughs, and recorded lectures from top educators.</p>
-      </div>
-      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20 }}>
-        {videos.map((v,i) => (
-          <div key={v.id} style={{ background:t.surface,border:`1px solid ${t.border}`,borderRadius:6,overflow:"hidden",cursor:"pointer",transition:"all 0.22s",animation:`fadeUp 0.4s ease ${i*0.06}s both` }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor=t.neon2; e.currentTarget.style.boxShadow=t.glow2; e.currentTarget.style.transform="translateY(-4px)"; }}
-            onMouseLeave={e=>{ e.currentTarget.style.borderColor=t.border; e.currentTarget.style.boxShadow="none"; e.currentTarget.style.transform="translateY(0)"; }}
-          >
-            <div style={{ background:`linear-gradient(135deg,${t.surface2},${t.bg2})`,height:140,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"3rem",position:"relative",borderBottom:`1px solid ${t.border}` }}>
-              {v.thumb}
-              <div style={{ position:"absolute",bottom:8,right:10,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",color:t.neon1,background:t.bg,padding:"2px 6px",borderRadius:3,border:`1px solid ${t.neon1}30` }}>{v.dur}</div>
-            </div>
-            <div style={{ padding:"14px 16px" }}>
-              <div style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"0.82rem",fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",color:t.text,marginBottom:8 }}>{v.title}</div>
-              <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",color:t.muted }}>{v.views} views</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   CONTACT PAGE
-═══════════════════════════════════════════════════════════════ */
-const ContactPage = () => {
-  const { t } = useContext(AppContext);
-  const [form, setForm] = useState({ name:"",email:"",subject:"",message:"" });
-  const [sent, setSent] = useState(false);
-  const fld = (key, placeholder) => (
-    <input
-      value={form[key]}
-      onChange={e=>setForm(p=>({...p,[key]:e.target.value}))}
-      placeholder={placeholder}
-      style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.82rem",padding:"12px 16px",border:`1px solid ${t.border}`,borderRadius:3,background:t.surface,color:t.text,outline:"none",letterSpacing:"0.04em",width:"100%",transition:"border-color 0.2s, box-shadow 0.2s" }}
-      onFocus={e=>{ e.target.style.borderColor=t.neon2; e.target.style.boxShadow=t.glow2; }}
-      onBlur={e=>{ e.target.style.borderColor=t.border; e.target.style.boxShadow="none"; }}
-    />
-  );
-  return (
-    <div style={{ padding:"36px 38px 70px",animation:"fadeIn 0.3s ease" }}>
-      <div style={{ maxWidth:640 }}>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.68rem",letterSpacing:"0.16em",color:t.neon2,textShadow:t.glow2,marginBottom:10 }}>// SECURE_CHANNEL</div>
-        <h1 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"2rem",fontWeight:900,letterSpacing:"0.08em",textTransform:"uppercase",color:t.text,marginBottom:10 }}>
-          <span style={{ color:t.neon1,textShadow:t.glow1 }}>CONTACT</span> US
-        </h1>
-        <p style={{ color:t.muted,lineHeight:1.7,fontSize:"0.95rem",marginBottom:32 }}>Transmit your query through the secure channel. We'll respond on the next uplink cycle.</p>
-
-        <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
-          <div>{fld("name","> OPERATOR_NAME")}</div>
-          <div>{fld("email","> EMAIL_ADDRESS")}</div>
-        </div>
-        <div style={{ marginTop:14 }}>{fld("subject","> SUBJECT_LINE")}</div>
-        <div style={{ marginTop:14 }}>
-          <textarea
-            value={form.message}
-            onChange={e=>setForm(p=>({...p,message:e.target.value}))}
-            placeholder="> BEGIN_MESSAGE.."
-            rows={5}
-            style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.82rem",padding:"12px 16px",border:`1px solid ${t.border}`,borderRadius:3,background:t.surface,color:t.text,outline:"none",letterSpacing:"0.04em",width:"100%",resize:"vertical",transition:"border-color 0.2s, box-shadow 0.2s" }}
-            onFocus={e=>{ e.target.style.borderColor=t.neon2; e.target.style.boxShadow=t.glow2; }}
-            onBlur={e=>{ e.target.style.borderColor=t.border; e.target.style.boxShadow="none"; }}
-          />
-        </div>
-        {sent ? (
-          <div style={{ marginTop:20,padding:"14px 20px",border:`1px solid ${t.neon1}`,borderRadius:3,color:t.neon1,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.78rem",textShadow:t.glow1,animation:"pulse 2s ease infinite" }}>
-            ✓ TRANSMISSION SUCCESSFUL — WE'LL BE IN TOUCH SOON.
-          </div>
-        ) : (
-          <button
-            onClick={()=>setSent(true)}
-            style={{ marginTop:18,fontFamily:"'Orbitron',sans-serif",fontSize:"0.72rem",fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",padding:"12px 28px",background:"transparent",color:t.neon1,border:`1px solid ${t.neon1}`,borderRadius:3,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:8,transition:"all 0.22s" }}
-            onMouseEnter={e=>{ e.currentTarget.style.background=t.neon1; e.currentTarget.style.color=t.bg; e.currentTarget.style.boxShadow=t.glow1; }}
-            onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; e.currentTarget.style.color=t.neon1; e.currentTarget.style.boxShadow="none"; }}
-          >
-            <Icon.send /> TRANSMIT
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   ABOUT PAGE
-═══════════════════════════════════════════════════════════════ */
-const AboutPage = () => {
-  const { t } = useContext(AppContext);
-  const stats = [
-    { val:"50K+", label:"Active Learners" },
-    { val:"120+", label:"Courses" },
-    { val:"94%", label:"Job Placement" },
-    { val:"40+", label:"Contributors" },
-  ];
-  return (
-    <div style={{ padding:"36px 38px 70px",animation:"fadeIn 0.3s ease" }}>
-      <div style={{ maxWidth:720 }}>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.68rem",letterSpacing:"0.16em",color:t.neon2,textShadow:t.glow2,marginBottom:10 }}>// SYSTEM_INFO</div>
-        <h1 style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"2rem",fontWeight:900,letterSpacing:"0.08em",textTransform:"uppercase",color:t.text,marginBottom:20 }}>
-          ABOUT <span style={{ color:t.neon1,textShadow:t.glow1 }}>CODEEASY</span>
-        </h1>
-
-        <div style={{ height:1,background:`linear-gradient(90deg,${t.neon1},${t.neon2},transparent)`,boxShadow:`0 0 8px ${t.neon1}`,marginBottom:28 }}/>
-
-        <p style={{ color:t.muted,lineHeight:1.8,fontSize:"0.97rem",marginBottom:16 }}>
-          <strong style={{ color:t.text }}>CodeEasy</strong> is a next-generation knowledge platform built for learners, developers, and curious minds navigating the digital frontier. We make quality learning accessible, organised, and genuinely enjoyable.
-        </p>
-        <p style={{ color:t.muted,lineHeight:1.8,fontSize:"0.97rem",marginBottom:32 }}>
-          Whether you're a complete beginner or a seasoned engineer, CodeEasy adapts to your journey — from structured courses and hands-on projects to real-time tech news. Dark. Fast. Reliable.
-        </p>
-
-        {/* Stats */}
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:16,marginBottom:36 }}>
-          {stats.map((s,i)=>(
-            <div key={i} style={{ background:t.surface,border:`1px solid ${t.border}`,borderRadius:6,padding:"20px 16px",textAlign:"center",animation:`fadeUp 0.4s ease ${i*0.08}s both` }}
-              onMouseEnter={e=>{ e.currentTarget.style.borderColor=t.neon1; e.currentTarget.style.boxShadow=t.glow1; }}
-              onMouseLeave={e=>{ e.currentTarget.style.borderColor=t.border; e.currentTarget.style.boxShadow="none"; }}
-            >
-              <div style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"1.6rem",fontWeight:900,color:t.neon1,textShadow:t.glow1,marginBottom:6 }}>{s.val}</div>
-              <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",color:t.muted,letterSpacing:"0.1em",textTransform:"uppercase" }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.75rem",color:t.neon2,letterSpacing:"0.1em",textShadow:t.glow2 }}>
-          BUILD: 2.0.0-NEON &nbsp;·&nbsp; CORE: STABLE &nbsp;·&nbsp; ☕ POWERED
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════════════════════════ */
-const Footer = () => {
-  const { t, navigate } = useContext(AppContext);
-  const [email, setEmail] = useState("");
-  const [subbed, setSubbed] = useState(false);
-
-  const col = (title, links) => (
-    <div>
-      <div style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"0.7rem",fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",color:t.neon1,textShadow:t.glow1,marginBottom:18 }}>{title}</div>
-      {links.map(l=>(
-        <div key={l.label} onClick={l.action} style={{ fontFamily:"'Rajdhani',sans-serif",fontSize:"0.88rem",color:t.muted,marginBottom:10,cursor:"pointer",letterSpacing:"0.03em",transition:"color 0.18s,text-shadow 0.18s" }}
-          onMouseEnter={e=>{e.currentTarget.style.color=t.neon2;e.currentTarget.style.textShadow=t.glow2}}
-          onMouseLeave={e=>{e.currentTarget.style.color=t.muted;e.currentTarget.style.textShadow="none"}}
-        >{l.label}</div>
-      ))}
-    </div>
-  );
-
-  return (
-    <footer style={{ position:"relative",zIndex:1,background:t.bg2,borderTop:`1px solid ${t.border}`,marginLeft:0,paddingBottom:0 }}>
-      {/* Top neon line */}
-      <div style={{ height:1,background:`linear-gradient(90deg,transparent,${t.neon1},${t.neon2},${t.neon3},transparent)`,boxShadow:`0 0 12px ${t.neon1}`,animation:"scanH 4s linear infinite" }}/>
-
-      <div style={{ maxWidth:1200,margin:"0 auto",padding:"52px 38px 0" }}>
-        <div style={{ display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr",gap:32,marginBottom:44 }}>
-
-          {/* Brand column */}
-          <div>
-            <div style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"1.4rem",fontWeight:900,letterSpacing:"0.12em",marginBottom:16 }}>
-              <span style={{ color:t.neon1,textShadow:t.glow1 }}>[CODE</span><span style={{ color:t.neon2,textShadow:t.glow2 }}>EASY]</span>
-            </div>
-            <p style={{ color:t.muted,fontSize:"0.88rem",lineHeight:1.7,marginBottom:24,maxWidth:240 }}>
-              Your neon-lit portal for curated courses, cutting-edge projects &amp; real-time news. Jack in. Level up.
-            </p>
-            {/* Newsletter */}
-            <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.62rem",letterSpacing:"0.12em",color:t.neon2,textShadow:t.glow2,marginBottom:10 }}>// SUBSCRIBE TO UPDATES</div>
-            {subbed ? (
-              <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.72rem",color:t.neon1,textShadow:t.glow1,animation:"pulse 2s infinite" }}>✓ UPLINK ESTABLISHED</div>
-            ) : (
-              <div style={{ display:"flex",gap:0 }}>
-                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="> your@email.com"
-                  style={{ flex:1,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.75rem",padding:"9px 13px",background:t.surface,border:`1px solid ${t.border}`,borderRight:"none",borderRadius:"3px 0 0 3px",color:t.text,outline:"none" }}
-                  onFocus={e=>{e.target.style.borderColor=t.neon2}}
-                  onBlur={e=>{e.target.style.borderColor=t.border}}
-                />
-                <button onClick={()=>email&&setSent(true)||setSubbed(true)}
-                  style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"0.6rem",fontWeight:700,letterSpacing:"0.12em",padding:"9px 14px",background:t.neon1,color:t.bg,border:"none",borderRadius:"0 3px 3px 0",cursor:"pointer",textTransform:"uppercase" }}>
-                  JOIN
-                </button>
-              </div>
-            )}
-            {/* Social icons */}
-            <div style={{ display:"flex",gap:12,marginTop:22 }}>
-              {[
-                { icon:<Icon.twitter/>, label:"Twitter" },
-                { icon:<Icon.github/>, label:"GitHub" },
-                { icon:<Icon.discord/>, label:"Discord" },
-                { icon:<Icon.youtube/>, label:"YouTube" },
-              ].map(s=>(
-                <div key={s.label} title={s.label} style={{ width:34,height:34,border:`1px solid ${t.border}`,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",color:t.muted,cursor:"pointer",transition:"all 0.18s" }}
-                  onMouseEnter={e=>{e.currentTarget.style.borderColor=t.neon2;e.currentTarget.style.color=t.neon2;e.currentTarget.style.boxShadow=t.glow2}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.color=t.muted;e.currentTarget.style.boxShadow="none"}}
-                >{s.icon}</div>
-              ))}
-            </div>
-          </div>
-
-          {col("Learn", [
-            { label:"All Courses", action:()=>navigate("notes") },
-            { label:"Projects", action:()=>navigate("notes") },
-            { label:"Videos", action:()=>navigate("videos") },
-            { label:"Bootcamp", action:()=>{} },
-            { label:"Certifications", action:()=>{} },
-          ])}
-
-          {col("Company", [
-            { label:"About Us", action:()=>navigate("about") },
-            { label:"Careers", action:()=>{} },
-            { label:"Blog", action:()=>{} },
-            { label:"Press Kit", action:()=>{} },
-            { label:"Partners", action:()=>{} },
-          ])}
-
-          {col("Support", [
-            { label:"Contact Us", action:()=>navigate("contact") },
-            { label:"Help Center", action:()=>{} },
-            { label:"Community", action:()=>{} },
-            { label:"Status", action:()=>{} },
-            { label:"Report Bug", action:()=>{} },
-          ])}
-
-          {col("Legal", [
-            { label:"Privacy Policy", action:()=>{} },
-            { label:"Terms of Use", action:()=>{} },
-            { label:"Cookie Policy", action:()=>{} },
-            { label:"GDPR", action:()=>{} },
-            { label:"Licenses", action:()=>{} },
-          ])}
-        </div>
-
-        {/* Payment methods */}
-        <div style={{ borderTop:`1px solid ${t.border}`,padding:"20px 0",display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:14 }}>
-          <div style={{ display:"flex",alignItems:"center",gap:10,flexWrap:"wrap" }}>
-            <span style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",color:t.muted,letterSpacing:"0.1em" }}>ACCEPTED:</span>
-            {["VISA","MC","AMEX","PAYPAL","STRIPE","CRYPTO"].map(p=>(
-              <div key={p} style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",letterSpacing:"0.08em",padding:"3px 8px",border:`1px solid ${t.border}`,borderRadius:3,color:t.muted }}>
-                {p}
-              </div>
-            ))}
-          </div>
-          <div style={{ display:"flex",gap:16,flexWrap:"wrap" }}>
-            {["SSL SECURED","256-BIT ENC","PCI DSS"].map(b=>(
-              <div key={b} style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",letterSpacing:"0.08em",padding:"3px 8px",border:`1px solid ${t.neon3}40`,borderRadius:3,color:t.neon3,textShadow:t.glow3 }}>
-                ✓ {b}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div style={{ borderTop:`1px solid ${t.border}`,padding:"16px 0",display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:10 }}>
-          <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.65rem",color:t.muted,letterSpacing:"0.06em" }}>
-            © 2025 CODEEASY SYSTEMS INC. ALL RIGHTS RESERVED.
-          </div>
-          <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",color:t.muted,display:"flex",gap:18,flexWrap:"wrap" }}>
-            {["Privacy","Terms","Cookies","Sitemap"].map(l=>(
-              <span key={l} style={{ cursor:"pointer",transition:"color 0.18s" }}
-                onMouseEnter={e=>{e.currentTarget.style.color=t.neon1}}
-                onMouseLeave={e=>{e.currentTarget.style.color=t.muted}}
-              >{l}</span>
-            ))}
-          </div>
-          <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",color:t.neon2,textShadow:t.glow2,letterSpacing:"0.08em",animation:"glow-flicker 6s ease infinite" }}>
-            BUILD 2.0.0-NEON ● ONLINE
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   LEFT NAVIGATION
-═══════════════════════════════════════════════════════════════ */
-const LeftNav = ({ currentPage, navOpen, setNavOpen, navigate, scrollTo, recent }) => {
-  const { t } = useContext(AppContext);
-
-  const navItem = (id, label, IconComp, action) => {
-    const active = currentPage === id;
-    return (
-      <div
-        onClick={() => { action(); if(window.innerWidth<=768) setNavOpen(false); }}
-        style={{
-          display:"flex",alignItems:"center",gap:12,padding:"10px 16px",cursor:"pointer",
-          fontFamily:"'Rajdhani',sans-serif",fontSize:"0.9rem",fontWeight:500,letterSpacing:"0.05em",
-          color: active ? t.neon1 : t.muted,
-          borderLeft: `2px solid ${active ? t.neon1 : "transparent"}`,
-          background: active ? `${t.neon1}08` : "transparent",
-          textShadow: active ? t.glow1 : "none",
-          transition:"all 0.18s",
-        }}
-        onMouseEnter={e=>{ if(!active){ e.currentTarget.style.color=t.neon2; e.currentTarget.style.textShadow=t.glow2; e.currentTarget.style.background=`${t.neon2}06`; } }}
-        onMouseLeave={e=>{ if(!active){ e.currentTarget.style.color=t.muted; e.currentTarget.style.textShadow="none"; e.currentTarget.style.background="transparent"; } }}
-      >
-        <span style={{ color: active ? t.neon1 : t.muted, filter: active ? `drop-shadow(0 0 4px ${t.neon1})` : "none", transition:"all 0.18s" }}>
-          <IconComp />
-        </span>
-        {label}
-      </div>
-    );
-  };
-
-  return (
-    <aside style={{
-      position:"fixed",top:62,left:0,bottom:0,width:242,
-      background:t.bg2,borderRight:`1px solid ${t.border}`,
-      overflowY:"auto",zIndex:95,
-      transform: navOpen || window.innerWidth>768 ? "translateX(0)" : "translateX(-100%)",
-      transition:"transform 0.3s",
-      display:"flex",flexDirection:"column",
-    }}>
-      {/* Right glow line */}
-      <div style={{ position:"absolute",top:0,right:-1,bottom:0,width:1,background:`linear-gradient(180deg,transparent,${t.neon1},${t.neon2},transparent)`,opacity:0.5 }}/>
-
-      <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",letterSpacing:"0.16em",textTransform:"uppercase",color:t.neon2,textShadow:t.glow2,padding:"20px 16px 8px",opacity:0.8 }}>
-        &gt; System
-      </div>
-
-      {navItem("notes","Notes",Icon.notes,()=>navigate("notes"))}
-      {navItem("videos","Videos",Icon.videos,()=>navigate("videos"))}
-      {navItem("contact","Contact Us",Icon.contact,()=>navigate("contact"))}
-      {navItem("about","About",Icon.about,()=>navigate("about"))}
-
-      <div style={{ height:1,background:`linear-gradient(90deg,transparent,${t.border},transparent)`,margin:"10px 16px" }}/>
-      <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",letterSpacing:"0.16em",textTransform:"uppercase",color:t.neon2,textShadow:t.glow2,padding:"4px 16px 8px",opacity:0.8 }}>&gt; Topics</div>
-
-      {navItem("courses","Courses",Icon.courses,()=>scrollTo("courses"))}
-      {navItem("projects","Projects",Icon.projects,()=>scrollTo("projects"))}
-      {navItem("news-sec","News",Icon.news,()=>scrollTo("news"))}
-
-      {recent.length > 0 && <>
-        <div style={{ height:1,background:`linear-gradient(90deg,transparent,${t.border},transparent)`,margin:"10px 16px" }}/>
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",letterSpacing:"0.16em",textTransform:"uppercase",color:t.neon2,textShadow:t.glow2,padding:"4px 16px 8px",opacity:0.8 }}>&gt; Recent</div>
-        {recent.map(item=>(
-          <div key={item.id}
-            onClick={()=>navigate("detail",item.id)}
-            style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.72rem",color:t.muted,padding:"5px 16px 5px 46px",cursor:"pointer",borderLeft:"2px solid transparent",transition:"all 0.15s",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis" }}
-            onMouseEnter={e=>{e.currentTarget.style.color=t.neon3;e.currentTarget.style.borderLeftColor=t.neon3}}
-            onMouseLeave={e=>{e.currentTarget.style.color=t.muted;e.currentTarget.style.borderLeftColor="transparent"}}
-          >↳ {item.title}</div>
-        ))}
-      </>}
-    </aside>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════════════════════════ */
-const Header = ({ navOpen, setNavOpen, currentTab, navigate, themeKey, setThemeKey }) => {
-  const { t } = useContext(AppContext);
-  const tabs = ["notes","videos","contact","about"];
-  const tabLabels = { notes:"Notes", videos:"Videos", contact:"Contact Us", about:"About" };
-
-  return (
-    <>
-      <header style={{ position:"fixed",top:0,left:0,right:0,height:62,background:t.bg2,borderBottom:`1px solid ${t.border}`,display:"flex",alignItems:"center",padding:"0 22px",gap:16,zIndex:100,boxShadow:"0 2px 20px rgba(0,0,0,0.6)" }}>
-        {/* Animated bottom line */}
-        <div style={{ position:"absolute",bottom:-1,left:0,right:0,height:1,background:`linear-gradient(90deg,transparent,${t.neon1},${t.neon2},transparent)`,animation:"scanH 4s linear infinite" }}/>
-
-        {/* Hamburger */}
-        <button onClick={()=>setNavOpen(p=>!p)} style={{ display:"none",background:"none",border:`1px solid ${t.border}`,cursor:"pointer",color:t.neon1,padding:"5px 7px",borderRadius:4,transition:"box-shadow 0.2s" }}
-          className="hamburger-btn"
-          onMouseEnter={e=>e.currentTarget.style.boxShadow=t.glow1}
-          onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}
-        >
-          {navOpen ? <Icon.close/> : <Icon.menu/>}
-        </button>
-
-        {/* Logo */}
-        <div onClick={()=>navigate("notes")} style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"1.25rem",fontWeight:900,letterSpacing:"0.12em",cursor:"pointer",whiteSpace:"nowrap" }}>
-          <span style={{ color:t.muted }}>[</span>
-          <span style={{ color:t.neon1,textShadow:t.glow1 }}>CODE</span>
-          <span style={{ color:t.neon2,textShadow:t.glow2 }}>EASY</span>
-          <span style={{ color:t.muted }}>]</span>
-        </div>
-
-        <div style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.62rem",color:t.neon1,letterSpacing:"0.1em",opacity:0.7,animation:"blink 1.8s step-end infinite" }}>● ONLINE</div>
-
-        <div style={{ flex:1 }}/>
-
-        {/* Theme switcher */}
-        <div style={{ display:"flex",alignItems:"center",gap:7 }}>
-          <span style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:"0.6rem",color:t.muted,letterSpacing:"0.08em" }}>THEME://</span>
-          {Object.entries(THEMES).map(([key,th])=>(
-            <div key={key} onClick={()=>setThemeKey(key)} title={th.name}
-              style={{ width:18,height:18,borderRadius:"50%",background:th.dot,border:themeKey===key?"1.5px solid #fff":"1.5px solid transparent",cursor:"pointer",transition:"transform 0.2s, box-shadow 0.2s",transform:themeKey===key?"scale(1.2)":"scale(1)",boxShadow:themeKey===key?"0 0 10px rgba(255,255,255,0.6)":"none" }}
-            />
-          ))}
-        </div>
-      </header>
-
-      {/* Top tabs */}
-      <nav style={{ position:"fixed",top:62,left:242,right:0,height:50,background:t.bg2,borderBottom:`1px solid ${t.border2}`,display:"flex",alignItems:"stretch",zIndex:90,transition:"left 0.3s",overflowX:"auto" }}
-        className="top-tabs-nav"
-      >
-        {tabs.map(tab=>{
-          const active = currentTab===tab;
-          return (
-            <button key={tab} onClick={()=>navigate(tab)}
-              style={{ fontFamily:"'Orbitron',sans-serif",fontSize:"0.68rem",fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:active?t.neon1:t.muted,background:"none",border:"none",borderBottom:`2px solid ${active?t.neon1:"transparent"}`,padding:"0 24px",cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.2s",textShadow:active?t.glow1:"none",position:"relative",top:1 }}
-              onMouseEnter={e=>{if(!active){e.currentTarget.style.color=t.neon2;e.currentTarget.style.textShadow=t.glow2}}}
-              onMouseLeave={e=>{if(!active){e.currentTarget.style.color=t.muted;e.currentTarget.style.textShadow="none"}}}
-            >
-              {active && <span style={{ marginRight:4,fontFamily:"'Share Tech Mono',monospace",fontSize:"0.8em" }}>//</span>}
-              {tabLabels[tab]}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Responsive styles */}
-      <style>{`
-        @media(max-width:768px){
-          .hamburger-btn{display:block!important}
-          .top-tabs-nav{left:0!important}
-          .main-content{margin-left:0!important}
-          .detail-content{margin-left:0!important}
-          .footer-content{margin-left:0!important}
-        }
-      `}</style>
-    </>
-  );
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   ROOT APP
-═══════════════════════════════════════════════════════════════ */
-export default function App() {
-  const [themeKey, setThemeKey] = useState("cyberpunk");
-  const [page, setPage] = useState("notes"); // notes | videos | contact | about | detail
-  const [detailId, setDetailId] = useState(null);
-  const [navOpen, setNavOpen] = useState(false);
-  const [recent, setRecent] = useState([]);
-
-  const t = THEMES[themeKey];
-
-  const navigate = useCallback((pg, id=null) => {
-    setPage(pg);
-    if(id) setDetailId(id);
-    setNavOpen(false);
-    window.scrollTo(0,0);
-  },[]);
-
-  const openDetail = useCallback((id) => {
-    setDetailId(id);
-    setPage("detail");
-    setRecent(prev => {
-      const item = ALL_ITEMS[id];
-      const next = [item, ...prev.filter(r=>r.id!==id)].slice(0,5);
-      return next;
-    });
-    window.scrollTo(0,0);
-  },[]);
-
-  const scrollTo = useCallback((id) => {
-    setPage("notes");
-    setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"}),80);
-  },[]);
-
-  const currentTab = ["notes","videos","contact","about"].includes(page) ? page : "notes";
-
-  return (
-    <AppContext.Provider value={{ t, navigate, themeKey }}>
-      <GlobalStyles t={t} />
-
-      <Header
-        navOpen={navOpen} setNavOpen={setNavOpen}
-        currentTab={currentTab} navigate={navigate}
-        themeKey={themeKey} setThemeKey={setThemeKey}
-      />
-
-      <LeftNav
-        currentPage={page} navOpen={navOpen} setNavOpen={setNavOpen}
-        navigate={navigate} scrollTo={scrollTo} recent={recent}
-      />
-
-      {/* Overlay for mobile nav */}
-      {navOpen && (
-        <div onClick={()=>setNavOpen(false)}
-          style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(2px)",zIndex:85 }}
-        />
-      )}
-
-      {/* Main content */}
-      <div className="main-content" style={{ marginLeft:242,marginTop:112,minHeight:"calc(100vh - 112px)",position:"relative",zIndex:1,transition:"margin-left 0.3s" }}>
-        {page==="notes"   && <NotesPage onOpenDetail={openDetail} />}
-        {page==="videos"  && <VideosPage />}
-        {page==="contact" && <ContactPage />}
-        {page==="about"   && <AboutPage />}
-        {page==="detail"  && <DetailPage itemId={detailId} onBack={()=>navigate("notes")} />}
-      </div>
-
-      {/* Footer */}
-      <div className="footer-content" style={{ marginLeft:242,transition:"margin-left 0.3s",position:"relative",zIndex:1 }}>
-        <Footer />
-      </div>
-    </AppContext.Provider>
-  );
+  </div>`;
 }
+
+document.getElementById('coursesGrid').innerHTML = data.courses.map(renderCard).join('');
+document.getElementById('projectsGrid').innerHTML = data.projects.map(renderCard).join('');
+document.getElementById('newsGrid').innerHTML = data.news.map(renderCard).join('');
+
+// ── TABS ──────────────────────────────────────────────────────────
+function showTab(name, btnEl) {
+  closeDetail(false);
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  else document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.toLowerCase().replace(/\s/g,'').includes(name)) b.classList.add('active');
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name)?.classList.add('active');
+  ['notes','videos','contact','about'].forEach(n =>
+    document.getElementById('nav-'+n)?.classList.toggle('active', n===name));
+}
+
+function goSection(id) {
+  showTab('notes');
+  closeNav();
+  setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────
+function openDetail(id) {
+  const item = allItems[id];
+  if (!item) return;
+  document.getElementById('detail-title').textContent = item.title;
+  document.getElementById('detail-date').textContent = item.date;
+  document.getElementById('detail-body').innerHTML = item.body;
+  const tag = document.getElementById('detail-tag');
+  tag.textContent = item.type.toUpperCase();
+  tag.className = 'detail-tag ' + item.type;
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('detail-page').classList.add('visible');
+  if (!recentlyViewed.find(r => r.id === id)) {
+    recentlyViewed.unshift(item);
+    if (recentlyViewed.length > 5) recentlyViewed.pop();
+    renderRecent();
+  }
+  window.scrollTo(0,0);
+}
+function closeDetail(restore=true) {
+  document.getElementById('detail-page').classList.remove('visible');
+  if (restore) document.getElementById('mainContent').style.display='';
+}
+
+// ── RECENT ────────────────────────────────────────────────────────
+function renderRecent() {
+  document.getElementById('recent-nav').innerHTML = recentlyViewed.map(item =>
+    `<div class="nav-sub" onclick="openDetail('${item.id}')">${item.title}</div>`
+  ).join('');
+}
+
+// ── NAV ───────────────────────────────────────────────────────────
+function toggleNav() {
+  document.getElementById('leftNav').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeNav() {
+  document.getElementById('leftNav').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── THEME ─────────────────────────────────────────────────────────
+function setTheme(name, el) {
+  document.documentElement.setAttribute('data-theme', name);
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
